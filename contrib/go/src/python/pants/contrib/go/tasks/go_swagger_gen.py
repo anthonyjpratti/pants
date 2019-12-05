@@ -25,9 +25,6 @@ class GoSwaggerGen(SimpleCodegenTask):
 
   sources_globs = ('**/*',)
 
-  _NAMESPACE_PARSER = re.compile(r'^\s*option\s+go_package\s*=\s*"([^\s]+)"\s*;', re.MULTILINE)
-  _PACKAGE_PARSER = re.compile(r'^\s*package\s+([^\s]+)\s*;', re.MULTILINE)
-
   @classmethod
   def register_options(cls, register):
     super().register_options(register)
@@ -73,7 +70,8 @@ class GoSwaggerGen(SimpleCodegenTask):
     env['GOPATH'] = target_workdir
 
     # NB: make the output directory usable as a go import path!
-    outdir = os.path.join(target_workdir, 'src', 'go')
+    # Is this double call to synthetic_target_dir needed?
+    outdir = os.path.join(target_workdir, 'src', 'go', self.synthetic_target_dir(target, target_workdir))
     safe_mkdir(outdir)
     target_cmd.append('--target={}'.format(outdir))
 
@@ -103,9 +101,6 @@ class GoSwaggerGen(SimpleCodegenTask):
 
   @classmethod
   def _get_go_namespace(cls, source):
-    with open(source, 'r') as fh:
-      data = fh.read()
-    namespace = cls._NAMESPACE_PARSER.search(data)
-    if not namespace:
-      namespace = cls._PACKAGE_PARSER.search(data)
-    return namespace.group(1)
+    parts = source.split('/')
+    index = parts.index('go')
+    return '/'.join(parts[index+1:-1])
