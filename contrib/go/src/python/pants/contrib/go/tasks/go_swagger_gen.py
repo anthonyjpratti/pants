@@ -71,7 +71,7 @@ class GoSwaggerGen(SimpleCodegenTask):
 
     # NB: make the output directory usable as a go import path!
     # Is this double call to synthetic_target_dir needed?
-    outdir = os.path.join(target_workdir, 'src', 'go', self.synthetic_target_dir(target, target_workdir))
+    outdir = self.synthetic_target_dir(target, target_workdir)
     safe_mkdir(outdir)
     target_cmd.append('--target={}'.format(outdir))
 
